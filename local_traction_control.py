@@ -1,5 +1,5 @@
 ################################################################################
-# cat run_1.msl | awk -F '\t' '{print $1,$26,$43,$44,$45,$46,$56}'|less
+
 # Time SPK: Traction retard VSS1 VSS2 VSS1 ms 1 VSS2 ms 1 TC slip * time
 
 # the info for traction control says "slip% X 0.01s"
@@ -46,11 +46,12 @@ for line in lines:
         tc_retard.append(float(details[25]))
 
 
-def percentage_difference_calculator(num1, num2):
-    if(num2 < tc_active_above or num2 > num1):
+def percentage_difference_calculator(vss1per, vss2per):
+    # % increase = Increase ÷ Original Number × 100
+    if(vss2per < tc_active_above or vss2per > vss1per):
         return 0
     else:
-        return (abs(num1 - num2)/((num1 + num2)/2) * 100)
+        return (((vss1per - vss2per)/vss2per)*100)
 
 def tc_retard_calc(current_slip_time):
     if(current_slip_time < tcslip_time[1] and current_slip_time > tcslip_time[0]):
@@ -76,8 +77,9 @@ while(count < len(vss1)):
 
         my_retard = tc_retard_calc(my_slip)
 
-        print("time: %0.2f tc_retard/my_retard: %0.2f/%0.2f tcslip/myslip: %0.2f/%0.2f difference %0.2f/%0.2f: %0.2f window: %0.2f"
-                % (time[count], tc_retard[count], my_retard, tcsliptime[count], my_slip,
-                vss1[count], vss2[count],
-                (percentage_difference_calculator(vss1[count], vss2[count])*slip_window), slip_window))
+        print("vss1/vss2:[%0.2f/%0.2f] diff: [%0.2f]" % (vss1[count], vss2[count], percentage_difference_calculator(vss1[count], vss2[count])))
+#        print("time: %0.2f tc_retard/my_retard: %0.2f/%0.2f tcslip/myslip: %0.2f/%0.2f difference %0.2f/%0.2f: %0.2f window: %0.2f"
+#                % (time[count], tc_retard[count], my_retard, tcsliptime[count], my_slip,
+#                vss1[count], vss2[count],
+#                (percentage_difference_calculator(vss1[count], vss2[count])), slip_window))
     count = count + 1
